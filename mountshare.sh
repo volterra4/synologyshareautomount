@@ -24,7 +24,7 @@ else
         rc=$?
         if [[ $rc -eq 0 ]] ; then
             echo "["$(date)"] - Internet available"
-            cryptpass=$(wget -nv -O - $1?$2)
+            cryptpass=$(wget -nv -O -q - $1?$2)
             if [[ $? -eq 0 ]]; then
                 password=$(echo "$cryptpass" | openssl enc -aes-256-cbc -a -d -salt -pass pass:$3)
                 echo "["$(date)"] - Mounting the encrypted share: "$2""
