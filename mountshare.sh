@@ -19,19 +19,19 @@ else
     echo "["$(date)"] - Time delay between each try "$delay" seconds"
     echo "["$(date)"] - Maximum number of tries "$count""
     while [[ $count -ne 0 ]] ; do
-        sleep $delay
         ping -c 1 $4 > /dev/null #Check internet availability
         rc=$?
         if [[ $rc -eq 0 ]] ; then
             echo "["$(date)"] - Internet available"
-            cryptpass=$(wget -nv -O -q - $1?$2)
+            cryptpass=$(curl -Ls --max-redirs 2 $1?$2)
             if [[ $? -eq 0 ]]; then
                 password=$(echo "$cryptpass" | openssl enc -aes-256-cbc -a -d -salt -pass pass:$3)
                 echo "["$(date)"] - Mounting the encrypted share: "$2""
-                result=$(synoshare --enc_mount $2 $password)
+                result=$(/usr/syno/sbin/synoshare --enc_mount $2 $password)
                 if [[ $? -eq 0 ]]; then
                      password=""
                      echo "["$(date)"] - Mount succesfull! "
+                     delay=0
                      ((count=1))
                 else
                      echo "["$(date)"] - Problems during mount: "$result
@@ -39,5 +39,6 @@ else
             fi
         fi
         ((count = count - 1))
+        sleep $delay
     done
 fi
